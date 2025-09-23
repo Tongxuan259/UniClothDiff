@@ -1,0 +1,33 @@
+model_cfg:
+  type: "Transformer3Dv2Model"
+  sample_size: 50
+  patch_size: 25
+  in_channels: 4
+  out_channels: 3
+  num_in_frames: 8
+  num_out_frames: 5
+  num_layers: 4
+  patchified_input: true
+  num_patches: 100
+  attention_head_dim: 72
+  template_mesh_path: "/ariesdv0/tongxuan/Code/UniClothDiff/misc/tshirt_raw_halfscale.pkl"
+
+diffusion_cfg:
+  type: "DDPM"
+  num_train_timesteps: 1000
+  beta_schedule: "scaled_linear"
+
+dataset_cfg:
+  type: "TshirtDynamicsDataset"
+  num_prev_frames: 3
+  num_next_frames: 5
+  max_delta_q: 0.05
+  max_delta_action: 0.02
+  action_mode: 'delta_ee_pose'
+
+wandb_cfg:
+  project_name: "ClothDiffusion"
+  entity: "tongxuan259"
+  tags: ["dynamics"]
+  name: "dynamics_delta"
+  resume: "allow"
