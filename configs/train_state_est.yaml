@@ -6,12 +6,10 @@ model_cfg:
   out_channels: 3
   num_layers: 6
   attention_head_dim: 72
-  pc_model: "eva02_large_patch14_448"
-  pc_enc_checkpoint: "/ariesdv0/tongxuan/Code/UniClothDiff/misc/model-g.pt"
   patchified_input: true
   num_in_frames: 2
   num_out_frames: 1
-  patch_file: "/ariesdv0/tongxuan/Code/UniClothDiff/misc/tshirt_raw_halfscale.pkl"
+  patch_file: path_to_template_mesh
 
 diffusion_cfg:
   type: "DDPM_StateEst"
@@ -20,7 +18,7 @@ diffusion_cfg:
 
 dataset_cfg:
   type: "TshirtStateEstDataset"
-  template_mesh_path: "/ariesdv0/tongxuan/Code/UniClothDiff/misc/tshirt_raw_halfscale.pkl"
+  template_mesh_path: path_to_template_mesh
   num_sample_points: 10000
   do_camera_pose_augmentation: true
   do_point_cloud_augmentation: true
@@ -30,13 +28,3 @@ dataset_cfg:
   points_jitter_sigma: 0.0005
   points_drop_ratio: 0.0
   
-wandb_cfg:
-  project_name: "ClothDiffusion"
-  entity: "tongxuan259"
-  tags: ["dynamics"]
-  name: "dynamics_delta"
-  resume: "allow"
-
-pc_encoder_cfg:
-  pc_model: "eva02_large_patch14_448"
-  pc_enc_checkpoint: "/ariesdv0/tongxuan/Code/UniClothDiff/misc/model-g.pt"

@@ -33,8 +33,7 @@ class DDPM_StateEst(DDPMScheduler):
         sample_input = torch.cat([q_prev, noisy_input], dim=1)
         _, num_frames, _, _, _ = sample_input.shape
         q_mask = q_mask.repeat(1, num_frames, 1, 1, 1)
-        # print(sample_input.shape)
-        # print(q_mask.shape)
+
         sample_input = torch.cat([sample_input, q_mask], dim=2)
 
         action = action
@@ -93,19 +92,6 @@ class DDPM_StateEst(DDPMScheduler):
             noise = torch.randn_like(input).to(weight_dtype).to(input.device)
 
         noisy_input = self.add_noise(input, noise, timesteps=t).to(weight_dtype).to(input.device)
-        # noisy_input = noisy_input.reshape(1,1,3,100,25)
-
-        # # Should be moved into the model forward
-        # # Conditioning dropout to support classifier-free guidance during inference.
-        # condition_dropout_pro = 0.0
-        # # if args.conditioning_dropout_prob is not None:
-        # random_p = torch.rand(batch_size, device=input.device, generator=generator)
-        # # Sample masks for the dropout action.
-        # cond_mask = random_p < 2 * condition_dropout_pro
-        # cond_mask = cond_mask.reshape(batch_size, 1, 1)
-        # # # Final action condition
-        # # null_action_condition = torch.zeros_like(action) - 1.0
-        # points = cond_mask * points
 
         colors = torch.ones_like(points, dtype=torch.float32, device=points.device) * 0.4
         encoder_hidden_states = torch.cat([points, colors], dim=-1)
@@ -116,7 +102,6 @@ class DDPM_StateEst(DDPMScheduler):
                 encoder_hidden_states[:, :, 3:].contiguous()
             )
             
-            # print("newly added feature norm, remeber to comment while inference")
             encoder_hidden_states = encoder_hidden_states / encoder_hidden_states.norm(dim=-1, keepdim=True)
             encoder_hidden_states = encoder_hidden_states.unsqueeze(1)
         # concate with template mesh vertex
@@ -169,7 +154,6 @@ class DDPM_StateEst(DDPMScheduler):
         noisy_input = self.add_noise(input, noise, timesteps=t).to(weight_dtype).to(input.device)
 
         # concate with template mesh vertex
-        # sample_input = torch.cat([q_temp.unsqueeze(1), noisy_input.unsqueeze(1)], dim=1)
         sample_input = torch.cat([noisy_input, q_temp], dim=-1)
         
         # prepare encoder hidden states

@@ -1,4 +1,2 @@
 from .cloth_dynamics import ClothDynamicsDataset
-from .tshirt_dynamics import TshirtDynamicsDataset
 from .cloth_state_est import ClothStateEstDataset
-from .tshirt_state_est import TshirtStateEstDataset

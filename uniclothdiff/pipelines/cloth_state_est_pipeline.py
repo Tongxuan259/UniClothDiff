@@ -25,10 +25,7 @@ from diffusers.utils import BaseOutput, logging, replace_example_docstring
 from diffusers.utils.torch_utils import is_compiled_module, randn_tensor
 from diffusers.pipelines.pipeline_utils import DiffusionPipeline
 
-from uniclothdiff.models.unet_2d_condition import UNet2DConditionModel
-from uniclothdiff.models.dit_transformer_2d import DiTTransformer2DModel
-from uniclothdiff.models.transformer_state_est import *
-# from uniclothdiff.models.unet_dynamics_condition import UNetDynamicsConditionModel
+from uniclothdiff.models.transformer_state_est_v3 import TransformerStateEstV3Model
 from uniclothdiff.utils.image_utils import *
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
@@ -55,7 +52,7 @@ class ClothStateEstPipeline(DiffusionPipeline):
 
     def __init__(
         self,
-        model: Union[DiTTransformer2DModel, UNet2DConditionModel],
+        model: TransformerStateEstV3Model,
         scheduler: DDPMScheduler,
         
     ):
@@ -147,23 +144,18 @@ class ClothStateEstPipeline(DiffusionPipeline):
         num_warmup_steps = len(timesteps) - num_inference_steps * self.scheduler.order
         self._num_timesteps = len(timesteps)
         
-        # encoder_hidden_states = encoder_hidden_states.repeat_interleave(2, dim=0)
-        # if do_classifier_free_guidance:
-        #     null_encoder_hidden_states = torch.zeros_like(encoder_hidden_states)
-        #     encoder_hidden_states_cfg = torch.cat([encoder_hidden_states, null_encoder_hidden_states], dim=0)
-        #     self._guidance_scale = guidance_scale
 
         pred_list = [x_0]
         x = x_0 # gaussian white noise
         
         with self.progress_bar(total=num_inference_steps) as progress_bar:
             for i, t in enumerate(timesteps):
-                # model_input = 
+
                 model_input = torch.cat([x, q_temp], dim=-1)
                 model_input = self.scheduler.scale_model_input(model_input, t)
                 
-                # if do_classifier_free_guidance:
-                #     model_input = torch.cat([model_input] * 2, dim=0)
+                if do_classifier_free_guidance:
+                    model_input = torch.cat([model_input] * 2, dim=0)
                     
                 # predict the noise residual
                 noise_pred = self.model(
@@ -172,10 +164,10 @@ class ClothStateEstPipeline(DiffusionPipeline):
                     encoder_hidden_states=encoder_hidden_states
                 )[0]
 
-                # # do classifier free guidance
-                # if do_classifier_free_guidance:
-                #     noise_pred_cond, noise_pred_uncond = noise_pred.chunk(2)
-                #     noise_pred = noise_pred_uncond + self.guidance_scale * (noise_pred_cond - noise_pred_uncond)
+                # do classifier free guidance
+                if do_classifier_free_guidance:
+                    noise_pred_cond, noise_pred_uncond = noise_pred.chunk(2)
+                    noise_pred = noise_pred_uncond + self.guidance_scale * (noise_pred_cond - noise_pred_uncond)
                 
                 # compute the previous noisy sample x_t -> x_t-1
                 x = self.scheduler.step(
@@ -273,7 +265,6 @@ class ClothStateEstPipeline(DiffusionPipeline):
         
         with self.progress_bar(total=num_inference_steps) as progress_bar:
             for i, t in enumerate(timesteps):
-                # model_input = 
                 model_input = torch.cat([q_temp.unsqueeze(1), x.unsqueeze(1)], dim=1)
                 model_input = self.scheduler.scale_model_input(model_input, t)
                 
