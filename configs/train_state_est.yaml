@@ -17,7 +17,7 @@ diffusion_cfg:
   beta_schedule: "scaled_linear"
 
 dataset_cfg:
-  type: "TshirtStateEstDataset"
+  type: "ClothStateEstDataset"
   template_mesh_path: path_to_template_mesh
   num_sample_points: 10000
   do_camera_pose_augmentation: true

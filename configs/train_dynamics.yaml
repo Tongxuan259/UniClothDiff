@@ -19,7 +19,7 @@ diffusion_cfg:
   beta_schedule: "scaled_linear"
 
 dataset_cfg:
-  type: "TshirtDynamicsDataset"
+  type: "ClothDynamicsDataset"
   num_prev_frames: 3
   num_next_frames: 5
   max_delta_q: 0.05
